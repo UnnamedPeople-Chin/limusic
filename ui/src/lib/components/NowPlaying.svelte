@@ -44,6 +44,7 @@
 	} from '$lib/video.svelte';
 	import { artRoom } from '$lib/artroom.svelte';
 	import { typing } from '$lib/shortcuts';
+	import { sidePanel } from '$lib/sidepanel.svelte';
 	import { appearance } from '$lib/theme.svelte';
 	import { t } from '$lib/i18n.svelte';
 	import { isMissingThumb, thumb } from '$lib/thumb';
@@ -490,6 +491,7 @@
 	onpointerup={(e) => (releasedKeep = keeps(e.target))}
 	onclick={onBackdropClick}
 	data-np-view
+	style="--side-panel-w:{sidePanel.width}px"
 	class="absolute top-0 -bottom-px left-16 right-0 z-20 flex overflow-hidden inert:bg-background {video.hole
 		? ''
 		: 'bg-background'} {stage ? '' : 'justify-center px-4 py-4 sm:px-6 sm:py-6 lg:px-10'} {ui.sidebarCollapsed

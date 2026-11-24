@@ -18,6 +18,10 @@ export const sidePanel = $state({
 	width: browser ? parsePanelWidth(readWidth()) : SIDE_PANEL_DEFAULT
 });
 
+export function previewSidePanelWidth(px: number) {
+	sidePanel.width = clampPanelWidth(px);
+}
+
 export function setSidePanelWidth(px: number) {
 	const next = clampPanelWidth(px);
 	sidePanel.width = next;

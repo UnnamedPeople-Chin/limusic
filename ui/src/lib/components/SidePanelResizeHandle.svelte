@@ -5,6 +5,7 @@
 		dragPanelWidth
 	} from '$lib/sidepanel';
 	import {
+		previewSidePanelWidth,
 		resetSidePanelWidth,
 		setSidePanelWidth,
 		sidePanel
@@ -24,12 +25,14 @@
 
 	function onPointerMove(e: PointerEvent) {
 		if (!drag) return;
-		setSidePanelWidth(dragPanelWidth(drag.startWidth, drag.startX, e.clientX));
+		previewSidePanelWidth(dragPanelWidth(drag.startWidth, drag.startX, e.clientX));
 	}
 
 	function onPointerUp() {
+		if (!drag) return;
 		drag = null;
 		dragging = false;
+		setSidePanelWidth(sidePanel.width);
 	}
 
 	function onKeyDown(e: KeyboardEvent) {

@@ -6,6 +6,7 @@
 	import { Maximize01Icon, Minimize01Icon } from '@hugeicons/core-free-icons';
 	import LyricsView from './LyricsView.svelte';
 	import SidePanelResizeHandle from './SidePanelResizeHandle.svelte';
+	import { sidePanel } from '$lib/sidepanel.svelte';
 	import { ui } from '$lib/player.svelte';
 	import { t } from '$lib/i18n.svelte';
 
@@ -31,6 +32,7 @@
 ></button>
 <aside
 	data-side-panel
+	style="--side-panel-w:{sidePanel.width}px"
 	transition:fly={{ x: 32, duration: 220, easing: cubicOut }}
 	class={expanded
 		? // ponytail: left offsets mirror Sidebar's w-16/lg:w-60 (and its manual collapse), right

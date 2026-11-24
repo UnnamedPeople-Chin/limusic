@@ -3,6 +3,7 @@
 	import { cubicOut } from 'svelte/easing';
 	import QueueList from './QueueList.svelte';
 	import SidePanelResizeHandle from './SidePanelResizeHandle.svelte';
+	import { sidePanel } from '$lib/sidepanel.svelte';
 	import { t } from '$lib/i18n.svelte';
 
 	let { onClose }: { onClose: () => void } = $props();
@@ -20,6 +21,7 @@
 ></button>
 <aside
 	data-side-panel
+	style="--side-panel-w:{sidePanel.width}px"
 	transition:fly={{ x: 32, duration: 220, easing: cubicOut }}
 	class="absolute inset-y-0 right-0 z-30 flex h-full w-[var(--side-panel-w,20rem)] max-w-[80vw] flex-col border-l bg-card/95 shadow-2xl"
 >
