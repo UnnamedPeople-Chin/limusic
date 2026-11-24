@@ -35,6 +35,7 @@
 		ArrowUp01Icon,
 		ClipboardIcon,
 		ComputerIcon,
+		Copy01Icon,
 		Delete02Icon,
 		FileImportIcon,
 		InformationCircleIcon,
@@ -81,6 +82,8 @@
 	import {
 		agentForKey,
 		buildLines,
+		cloneCandidates,
+		cloneLineTiming,
 		draftKey,
 		estimateMs,
 		eventWallMs,
@@ -681,6 +684,19 @@
 		updateLine(lines[cur].id, resetLine);
 		resetTake();
 		tapBg = startVoice(lines[cur].words);
+	}
+
+	const cloneList = $derived(mode === 'edit' ? cloneCandidates(lines, cur) : []);
+	let cloneOpen = $state(false);
+	function applyClone(source: EdLine) {
+		if (!line) return;
+		commitField();
+		const cloned = cloneLineTiming(source, lines[cur]);
+		if (!cloned) return;
+		updateLine(lines[cur].id, () => cloned);
+		resetTake();
+		tapBg = startVoice(cloned.words);
+		cloneOpen = false;
 	}
 
 	/** Singer 1, singer 2, any other the lyric already names, and everyone together. */
@@ -1492,6 +1508,9 @@
 									<button type="button" class={MENU_ITEM} disabled={!line || !hasLineTiming(line)} onclick={() => ((lineMenu = false), resetCurrentLine())}>
 										<HugeiconsIcon icon={ArrowTurnBackwardIcon} class="size-4" />{t('lyrics_editor.reset_line')}
 									</button>
+									<button type="button" class={MENU_ITEM} disabled={!line || line.time === undefined || !cloneList.length} onclick={() => ((lineMenu = false), (cloneOpen = true))}>
+										<HugeiconsIcon icon={Copy01Icon} class="size-4" />{t('lyrics_editor.clone_timing')}
+									</button>
 									<div class="my-1 h-px bg-border"></div>
 									<button type="button" class="{MENU_ITEM} text-destructive" disabled={lines.length < 2} onclick={() => ((lineMenu = false), removeLine())}>
 										<HugeiconsIcon icon={Delete02Icon} class="size-4" />{t('lyrics_editor.delete_line')}
@@ -1890,3 +1909,32 @@
 		</AlertDialog.Footer>
 	</AlertDialog.Content>
 </AlertDialog.Root>
+
+<Dialog.Root bind:open={cloneOpen}>
+	<Dialog.Content class="sm:max-w-md">
+		<Dialog.Header>
+			<Dialog.Title class="font-heading text-lg leading-tight font-bold">{t('lyrics_editor.clone_timing_title')}</Dialog.Title>
+			<Dialog.Description class="text-[13.5px] leading-relaxed">{t('lyrics_editor.clone_timing_hint')}</Dialog.Description>
+		</Dialog.Header>
+		<div class="max-h-72 overflow-y-auto space-y-1 py-1">
+			{#each cloneList as c (c.line.id)}
+				<button
+					type="button"
+					class="flex w-full cursor-pointer items-center gap-2.5 rounded-lg px-2.5 py-2 text-left text-sm hover:bg-muted"
+					onclick={() => applyClone(c.line)}
+				>
+					<span class="w-6 shrink-0 text-right text-xs text-muted-foreground tabular-nums">{c.index + 1}</span>
+					<span class="min-w-0 flex-1 truncate font-medium">{lineText(c.line)}</span>
+					{#if c.exact}
+						<span class="shrink-0 rounded-full bg-primary/15 px-2 py-0.5 text-[11px] font-semibold text-primary">
+							{t('lyrics_editor.clone_exact')}
+						</span>
+					{/if}
+				</button>
+			{/each}
+		</div>
+		<Dialog.Footer>
+			<Button variant="ghost" onclick={() => (cloneOpen = false)}>{t('common.cancel')}</Button>
+		</Dialog.Footer>
+	</Dialog.Content>
+</Dialog.Root>

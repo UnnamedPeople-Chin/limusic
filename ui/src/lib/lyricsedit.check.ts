@@ -10,6 +10,8 @@ import {
 	agentForKey,
 	autoSplit,
 	buildLines,
+	cloneCandidates,
+	cloneLineTiming,
 	draftKey,
 	estimateMs,
 	eventWallMs,
@@ -501,6 +503,73 @@ ok(draftKey('abc') === 'lyrics_draft:abc', 'one key per song');
 	ok(resetLine(r2) === r2, 'resetting an untimed line changes nothing');
 	const g = resetLine(gapLine(5, 4200));
 	ok(g.gap === true && g.time === undefined && needsLineTime(g), 'resetting a timed gap clears its start');
+}
+
+// --- Cloning timing ---------------------------------------------------------------------------
+{
+	const chorus: EdLine = {
+		id: 1,
+		time: 10_000,
+		end: 11_400,
+		words: [
+			w('hello ', 10_000, 10_500),
+			{ ...w('world', 10_700, 11_400), bg: true }
+		]
+	};
+	const targetChorus: EdLine = {
+		id: 2,
+		time: 30_000,
+		words: [w('HELLO '), w('world')]
+	};
+	const diffWords: EdLine = {
+		id: 3,
+		time: 50_000,
+		words: [w('goodbye '), w('now')]
+	};
+	const wrongCount: EdLine = {
+		id: 4,
+		time: 60_000,
+		words: [w('one')]
+	};
+	const untimedTarget: EdLine = {
+		id: 5,
+		words: [w('no '), w('start')]
+	};
+
+	const cands = cloneCandidates([diffWords, chorus, targetChorus, wrongCount], 2);
+	ok(
+		cands.length === 1 && cands[0].index === 1 && cands[0].exact,
+		'cloneCandidates only returns timed lines with matching word count'
+	);
+	const timedDiff: EdLine = {
+		id: 6,
+		time: 40_000,
+		end: 41_000,
+		words: [w('bye ', 40_000, 40_400), w('friend', 40_400, 41_000)]
+	};
+	const ordered = cloneCandidates([timedDiff, chorus, targetChorus], 2);
+	ok(
+		ordered.length === 2 && ordered[0].index === 1 && ordered[0].exact && !ordered[1].exact,
+		'exact text matches sort ahead of same-word-count candidates'
+	);
+
+	const cloned = cloneLineTiming(chorus, diffWords)!;
+	ok(
+		cloned.time === 50_000 &&
+			cloned.end === 51_400 &&
+			cloned.dirty === true &&
+			cloned.words[0].text === 'goodbye ' &&
+			cloned.words[0].start === 50_000 &&
+			cloned.words[0].end === 50_500 &&
+			cloned.words[1].text === 'now' &&
+			cloned.words[1].start === 50_700 &&
+			cloned.words[1].end === 51_400 &&
+			cloned.words[1].bg === undefined,
+		'cloneLineTiming shifts timings to target start while keeping target words and bg flags'
+	);
+	ok(cloneLineTiming(chorus, untimedTarget) === null, 'target without start cannot clone timing');
+	ok(cloneLineTiming(diffWords, targetChorus) === null, 'untimed source returns null');
+	ok(cloneLineTiming(chorus, wrongCount) === null, 'mismatched word counts return null');
 }
 
 console.log('ok');
