@@ -44,6 +44,7 @@
 	} from '$lib/video.svelte';
 	import { artRoom } from '$lib/artroom.svelte';
 	import { typing } from '$lib/shortcuts';
+	import { sidePanel } from '$lib/sidepanel.svelte';
 	import { appearance } from '$lib/theme.svelte';
 	import { t } from '$lib/i18n.svelte';
 	import { isMissingThumb, thumb } from '$lib/thumb';
@@ -74,7 +75,11 @@
 	const stage = $derived(!appearance.classicPlayer);
 	// ponytail: mirrors QueuePanel / LyricsPanel's w-80, keep in sync if those change.
 	const panels = $derived(Number(queueOpen) + Number(lyricsOpen));
-	const inset = $derived(['', 'lg:right-80', 'lg:right-[40rem]'][panels]);
+	const inset = $derived(
+		['', 'lg:right-[var(--side-panel-w,20rem)]', 'lg:right-[calc(var(--side-panel-w,20rem)*2)]'][
+			panels
+		]
+	);
 
 	// Going somewhere means the user wants that page, not this one: minimise. The player bar brings
 	// it back. beforeNavigate (not a pathname effect) so clicking the tab you're already on counts.
@@ -486,6 +491,7 @@
 	onpointerup={(e) => (releasedKeep = keeps(e.target))}
 	onclick={onBackdropClick}
 	data-np-view
+	style="--side-panel-w:{sidePanel.width}px"
 	class="absolute top-0 -bottom-px left-16 right-0 z-20 flex overflow-hidden inert:bg-background {video.hole
 		? ''
 		: 'bg-background'} {stage ? '' : 'justify-center px-4 py-4 sm:px-6 sm:py-6 lg:px-10'} {ui.sidebarCollapsed
